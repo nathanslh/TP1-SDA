@@ -24,6 +24,7 @@ class Demonstran implements Comparable<Demonstran> {
         this.isRemoved = false;
     }
 
+    // Method getter dan setter
     public int getID() {
         return ID;
     }
@@ -61,6 +62,7 @@ class Demonstran implements Comparable<Demonstran> {
 class S {
     int E;
 
+    // Method getter dan setter
     public S(int E){
         this.E = E;
     }
@@ -72,11 +74,11 @@ class S {
 
 public class TP1 {
     static int ID = 0; // ID unik untuk demonstran
-    static PriorityQueue<Demonstran> antreanDemo = new PriorityQueue<>();
+    static PriorityQueue<Demonstran> antreanDemo = new PriorityQueue<>(); 
     static ArrayDeque<Demonstran> antreanKonsumsi = new ArrayDeque<>();
     static Stack <S> tumpukanSpanduk = new Stack<>();
-    static HashMap<Integer, Demonstran> mapDemonstran = new HashMap<>();
-    static HashMap<Integer, Demonstran> mapKonsumsi = new HashMap<>();
+    static HashMap<Integer, Demonstran> mapDemonstran = new HashMap<>(); // Untuk menu L
+    static HashMap<Integer, Demonstran> mapKonsumsi = new HashMap<>(); // Untuk menu L
 
     public static void main(String[] args) throws IOException {
         InputReader in = new InputReader(System.in);
@@ -119,40 +121,46 @@ public class TP1 {
         for (int i = 0; i < Q; i++) {
             String aktivitas = in.next();
 
+            // Jika input A
             if (aktivitas.equals("A")) {
                 int E = in.nextInteger();
                 int U = in.nextInteger();
                 A(E, U, out);
 
+            // Jika input B
             } else if (aktivitas.equals("B")) {
                 B(out);
 
+            // Jika input K
             } else if (aktivitas.equals("K")) {
                 int bawah = in.nextInteger();
                 int atas = in.nextInteger();  
                 K(bawah, atas, out);    
 
+            // Jika input S
             } else if (aktivitas.equals("S")) {
                 int energiSpanduk = in.nextInteger(); 
                 S spanduk = new S(energiSpanduk);
                 tumpukanSpanduk.push(spanduk);
                 out.println(tumpukanSpanduk.size());
 
+            // Jika input L
             } else if (aktivitas.equals("L")) {
                 int id = in.nextInteger();
                 L(id, out);
                 
+            // Jika input O
             } else if (aktivitas.equals("O")) {
                 int X = in.nextInteger();
                 O(X, out);
+
+            // Jika input P
             } else if (aktivitas.equals("P")) {
                 int X = in.nextInteger();
                 P(X, out);
             }
         }
-
-        out.close();
-    
+        out.close(); // Tutup PrintWriter
     }
 
     public static void A(int E, int U, PrintWriter out) {
@@ -185,17 +193,21 @@ public static void B(PrintWriter out) {
         energiSpanduk = tumpukanSpanduk.pop().getE();
     }
 
+    // Hitung sisa energi
     int sisaEnergi = demo.getE() - energiSpanduk; 
 
+    // Jika sisa energi > 0, masuk ke antrean konsumsi
     if (sisaEnergi > 0) {
         demo.setE(sisaEnergi);
         out.println(sisaEnergi);
         antreanKonsumsi.addLast(demo);
         mapDemonstran.remove(demo.getID()); 
         mapKonsumsi.put(demo.getID(), demo); 
+    
+    // Jika sisa energi <= 0, demonstran kelua
     } else {
         out.println("0"); 
-        mapDemonstran.remove(demo.getID());
+        mapDemonstran.remove(demo.getID());  
     }
 
     
@@ -214,22 +226,25 @@ public static void B(PrintWriter out) {
 }
 
     public static void L(int id, PrintWriter out) {
-        Demonstran demo = null;
+        Demonstran demo = null; 
         int lokasi = 0;
         int energiTerakhir = 0;
 
+        // Cek di mapDemonstran 
         if (mapDemonstran.containsKey(id)){
             demo = mapDemonstran.get(id);
             lokasi = 1;
             energiTerakhir = demo.getE();
             System.out.println(lokasi + " " + energiTerakhir);
 
+        // Cek di mapKonsumsi
         } else if (mapKonsumsi.containsKey(id)){
             demo = mapKonsumsi.get(id);
             lokasi = 2;
             energiTerakhir = demo.getE();
             System.out.println(lokasi + " " + energiTerakhir);
 
+        // Jika tidak ada di kedua map
         } else {
             out.println("-1");
             return;
