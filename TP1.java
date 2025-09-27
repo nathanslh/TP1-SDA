@@ -51,7 +51,6 @@ class Demonstran implements Comparable<Demonstran> {
 
     @Override
     public int compareTo(Demonstran other) {
-        // Prioritas: energi kecil ? urgensi besar ? ID kecil
         if (this.E != other.E) return this.E - other.E;
         if (this.U != other.U) return other.U - this.U;
         return this.ID - other.ID;
@@ -172,7 +171,6 @@ public class TP1 {
     }
 
 public static void B(PrintWriter out) {
-
     // Hapus elemen yang ditandai removed sebelum diproses
     while (!antreanDemo.isEmpty() && antreanDemo.peek().isRemoved()) {
         antreanDemo.poll(); 
@@ -209,7 +207,6 @@ public static void B(PrintWriter out) {
         out.println("0"); 
         mapDemonstran.remove(demo.getID());  
     }
-
     
     PriorityQueue<Demonstran> antreanDemoBaru = new PriorityQueue<>();
     while (!antreanDemo.isEmpty()) {
@@ -235,14 +232,14 @@ public static void B(PrintWriter out) {
             demo = mapDemonstran.get(id);
             lokasi = 1;
             energiTerakhir = demo.getE();
-            System.out.println(lokasi + " " + energiTerakhir);
+            out.println(lokasi + " " + energiTerakhir);
 
         // Cek di mapKonsumsi
         } else if (mapKonsumsi.containsKey(id)){
             demo = mapKonsumsi.get(id);
             lokasi = 2;
             energiTerakhir = demo.getE();
-            System.out.println(lokasi + " " + energiTerakhir);
+            out.println(lokasi + " " + energiTerakhir);
 
         // Jika tidak ada di kedua map
         } else {
