@@ -1,4 +1,4 @@
-﻿import java.io.BufferedReader;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -232,6 +232,8 @@ public static void B(PrintWriter out) {
             demo = mapDemonstran.get(id);
             lokasi = 1;
             energiTerakhir = demo.getE();
+            mapDemonstran.remove(id); // Hapus dari mapDemonstran
+            demo.setRemoved(true); // Tandai sebagai removed
             out.println(lokasi + " " + energiTerakhir);
 
         // Cek di mapKonsumsi
@@ -239,6 +241,8 @@ public static void B(PrintWriter out) {
             demo = mapKonsumsi.get(id);
             lokasi = 2;
             energiTerakhir = demo.getE();
+            mapKonsumsi.remove(id); // Hapus dari mapKonsumsi
+            demo.setRemoved(true); // Tandai sebagai removed
             out.println(lokasi + " " + energiTerakhir);
 
         // Jika tidak ada di kedua map
