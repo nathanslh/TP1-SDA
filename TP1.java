@@ -13,45 +13,53 @@ import java.util.StringTokenizer;
 // Kelas untuk demonstran
 class Demonstran implements Comparable<Demonstran> {
     int ID;
-    int E; // Energi konsumsi
+    int E; // Energi basis
     int U; // Urgensi
-    boolean isRemoved = false; // flag untuk menandai demonstran yang keluar antrean
+    boolean isRemoved = false;
+    int FlagB; // Pencatat nilai globalOffset saat demonstran masuk/pindah antrean
 
+    // Konstruktor kelas Demonstran
     public Demonstran(int ID, int E, int U) {
         this.ID = ID;
         this.E = E;
         this.U = U;
-        this.isRemoved = false;
+        this.FlagB = 0;
     }
 
     // Method getter dan setter
-    public int getID() {
-        return ID;
+    public int getID() { 
+        return ID; 
+    
+    }
+    public int getEnergiAktual(int globalOffset) { 
+        return E - (globalOffset - FlagB); 
+    
+    }
+    public int getU() { 
+        return U; 
     }
 
-    public int getE() {
-        return E;
+    public void setE(int E) { 
+        this.E = E; 
     }
 
-    public int getU() {
-        return U;
+    public void setFlagB(int flagB) { 
+        this.FlagB = flagB; 
     }
 
-    public void setE(int E) {
-        this.E = E;
+    public void setRemoved(boolean removed) { 
+        isRemoved = removed; 
     }
 
-    public void setRemoved(boolean removed) {
-        isRemoved = removed;
-    }
-
-    public boolean isRemoved() {
-        return isRemoved;
+    public boolean isRemoved() { 
+        return isRemoved; 
     }
 
     @Override
     public int compareTo(Demonstran other) {
-        if (this.E != other.E) return this.E - other.E;
+        int thisEnergi = this.getEnergiAktual(TP1.globalOffset);
+        int otherEnergi = other.getEnergiAktual(TP1.globalOffset);
+        if (thisEnergi != otherEnergi) return thisEnergi - otherEnergi;
         if (this.U != other.U) return other.U - this.U;
         return this.ID - other.ID;
     }
@@ -61,214 +69,206 @@ class Demonstran implements Comparable<Demonstran> {
 class S {
     int E;
 
-    // Method getter dan setter
-    public S(int E){
-        this.E = E;
+    public S(int E){ 
+        this.E = E; 
     }
 
-    public int getE(){
-        return E;
+    public int getE(){ 
+        return E; 
     }
 }
 
 public class TP1 {
-    static int ID = 0; // ID unik untuk demonstran
+    static int ID = 0; // ID Demonstran
+    static int globalOffset = 0; // Offset global untuk pengurangan energi
     static PriorityQueue<Demonstran> antreanDemo = new PriorityQueue<>(); 
     static ArrayDeque<Demonstran> antreanKonsumsi = new ArrayDeque<>();
     static Stack <S> tumpukanSpanduk = new Stack<>();
-    static HashMap<Integer, Demonstran> mapDemonstran = new HashMap<>(); // Untuk menu L
-    static HashMap<Integer, Demonstran> mapKonsumsi = new HashMap<>(); // Untuk menu L
-
+    static HashMap<Integer, Demonstran> mapDemonstran = new HashMap<>(); // Untuk pencarian cepat
+    static HashMap<Integer, Demonstran> mapKonsumsi = new HashMap<>(); // Untuk pencarian cepat
+    static int[] energiKonsumsi; 
+    
     public static void main(String[] args) throws IOException {
         InputReader in = new InputReader(System.in);
         PrintWriter out = new PrintWriter(System.out);
 
-        // Baca input N, M, Q
+        // Input N, M, Q
         int N = in.nextInteger();
         int M = in.nextInteger();
         int Q = in.nextInteger();
 
         // Input energi konsumsi
-        int[] energiKonsumsi = new int[N];
+        energiKonsumsi = new int[N];
         for (int i = 0; i < N; i++) {
             energiKonsumsi[i] = in.nextInteger();
         }
 
         // Input energi poster
-        int[] energiPoster = new int[M];
-        for (int j = 0; j < M; j++) {
-            int P = in.nextInteger();
-            energiPoster[j] = P;
-        }
-        Arrays.sort(energiPoster); // Sort ascending nilai energi poster
-
-        // Input keefektifan poster
-        int[] keefektifanPoster = new int[M];
-        for (int k = 0; k < M; k++) {
-            int V = in.nextInteger();
-            keefektifanPoster[k] = V;
+        for (int j = 0; j < M; j++) { 
+            in.nextInteger(); 
         }
 
-        // Sort descending nilai efektivitas poster
-        Arrays.sort(keefektifanPoster);
-        for (int k = 0; k < M / 2; k++) {
-            int temp = keefektifanPoster[k];
-            keefektifanPoster[k] = keefektifanPoster[M - 1 - k];
-            keefektifanPoster[M - 1 - k] = temp;
+        // Input nilai keefektifan poster
+        for (int k = 0; k < M; k++) { 
+            in.nextInteger(); 
         }
 
+        // Input aktivitas
         for (int i = 0; i < Q; i++) {
             String aktivitas = in.next();
-
-            // Jika input A
             if (aktivitas.equals("A")) {
-                int E = in.nextInteger();
-                int U = in.nextInteger();
-                A(E, U, out);
-
-            // Jika input B
+                A(in.nextInteger(), in.nextInteger(), out);
             } else if (aktivitas.equals("B")) {
                 B(out);
-
-            // Jika input K
             } else if (aktivitas.equals("K")) {
-                int bawah = in.nextInteger();
-                int atas = in.nextInteger();  
-                K(bawah, atas, out);    
-
-            // Jika input S
+                K(in.nextInteger(), in.nextInteger(), out);
             } else if (aktivitas.equals("S")) {
-                int energiSpanduk = in.nextInteger(); 
-                S spanduk = new S(energiSpanduk);
-                tumpukanSpanduk.push(spanduk);
+                tumpukanSpanduk.push(new S(in.nextInteger()));
                 out.println(tumpukanSpanduk.size());
-
-            // Jika input L
             } else if (aktivitas.equals("L")) {
-                int id = in.nextInteger();
-                L(id, out);
-                
-            // Jika input O
+                L(in.nextInteger(), out);
             } else if (aktivitas.equals("O")) {
-                int X = in.nextInteger();
-                O(X, out);
-
-            // Jika input P
+                O(in.nextInteger(), out);
             } else if (aktivitas.equals("P")) {
-                int X = in.nextInteger();
-                P(X, out);
+                P(in.nextInteger(), out);
             }
         }
-        out.close(); // Tutup PrintWriter
+        out.close();
     }
 
+    // Method untuk aktivitas A
     public static void A(int E, int U, PrintWriter out) {
         Demonstran person = new Demonstran(ID, E, U);
-        antreanDemo.add(person);  // masuk ke antrean demo
-        mapDemonstran.put(ID, person); // simpan ke mapDemonstran
+        person.setFlagB(globalOffset); // Set FlagB ke nilai globalOffset saat ini
+        antreanDemo.add(person); // Tambah ke antrean demonstran
+        mapDemonstran.put(ID, person); // Masukan ke mapDemonstran
         out.println(ID);  
-        ID++;
+        ID++; // Inkrement ID
     }
 
-public static void B(PrintWriter out) {
-    // Hapus elemen yang ditandai removed sebelum diproses
-    while (!antreanDemo.isEmpty() && antreanDemo.peek().isRemoved()) {
-        antreanDemo.poll(); 
-    }
-
-    // Antrian demonstran kosong
-    if (antreanDemo.isEmpty()) {
-        out.println("-1");
-        return;
-    }
-
-    // Ambil demonstran prioritas tertinggi
-    Demonstran demo = antreanDemo.poll();
-
-    // Default energi spanduk
-    int energiSpanduk = 0;
-    if (!tumpukanSpanduk.isEmpty()) {
-        energiSpanduk = tumpukanSpanduk.pop().getE();
-    }
-
-    // Hitung sisa energi
-    int sisaEnergi = demo.getE() - energiSpanduk; 
-
-    // Jika sisa energi > 0, masuk ke antrean konsumsi
-    if (sisaEnergi > 0) {
-        demo.setE(sisaEnergi);
-        out.println(sisaEnergi);
-        antreanKonsumsi.addLast(demo);
-        mapDemonstran.remove(demo.getID()); 
-        mapKonsumsi.put(demo.getID(), demo); 
-    
-    // Jika sisa energi <= 0, demonstran kelua
-    } else {
-        out.println("0"); 
-        mapDemonstran.remove(demo.getID());  
-    }
-    
-    PriorityQueue<Demonstran> antreanDemoBaru = new PriorityQueue<>();
-    while (!antreanDemo.isEmpty()) {
-        Demonstran d = antreanDemo.poll();
-        d.setE(d.getE() - 1);
-        
-        if (d.getE() > 0 && !d.isRemoved()) {
-            antreanDemoBaru.add(d);
-        } else {
-            mapDemonstran.remove(d.getID());
+    // Method untuk aktivitas B
+    public static void B(PrintWriter out) {
+        // Bersihkan antrean demonstran dari yang sudah dihapus atau energinya habis
+        while (!antreanDemo.isEmpty()) {
+            Demonstran peek = antreanDemo.peek();
+            if (peek.isRemoved() || peek.getEnergiAktual(globalOffset) <= 0) {
+                mapDemonstran.remove(antreanDemo.poll().getID());
+            } else {
+                break;
+            }
         }
+
+        // Jika antrean kosong
+        if (antreanDemo.isEmpty()) {
+            out.println("-1");
+
+        } else {
+            Demonstran demo = antreanDemo.poll(); // Ambil demonstran dengan prioritas tertinggi
+            mapDemonstran.remove(demo.getID());
+            int energiAktual = demo.getEnergiAktual(globalOffset);
+            
+            int energiSpanduk = 0;
+            if (!tumpukanSpanduk.isEmpty()) {
+                energiSpanduk = tumpukanSpanduk.pop().getE();
+            }
+            int sisaEnergi = energiAktual - energiSpanduk;
+
+            if (sisaEnergi > 0) {
+                out.println(sisaEnergi);
+                demo.setE(sisaEnergi);
+                demo.setFlagB(globalOffset + 1); // Set FlagB ke nilai globalOffset + 1
+                antreanKonsumsi.addLast(demo); // Pindah ke antrean konsumsi
+                mapKonsumsi.put(demo.getID(), demo); // Masukan ke mapKonsumsi
+            } else {
+                out.println(demo.getID());
+            }
+        }
+        globalOffset++; // Inkrement globalOffset
     }
-    antreanDemo = antreanDemoBaru;
-}
-
+    
     public static void L(int id, PrintWriter out) {
-        Demonstran demo = null; 
-        int lokasi = 0;
-        int energiTerakhir = 0;
 
-        // Cek di mapDemonstran 
+        // Cek di mapDemonstran
         if (mapDemonstran.containsKey(id)){
-            demo = mapDemonstran.get(id);
-            lokasi = 1;
-            energiTerakhir = demo.getE();
+            Demonstran demo = mapDemonstran.get(id);
+            int energiTerakhir = demo.getEnergiAktual(globalOffset);
+
+            if (energiTerakhir <= 0) {
+                out.println("-1");
+            } else {
+                out.println(1 + " " + energiTerakhir);
+            }
+            demo.setRemoved(true); // Tandai sebagai dihapus
             mapDemonstran.remove(id); // Hapus dari mapDemonstran
-            demo.setRemoved(true); // Tandai sebagai removed
-            out.println(lokasi + " " + energiTerakhir);
 
         // Cek di mapKonsumsi
         } else if (mapKonsumsi.containsKey(id)){
-            demo = mapKonsumsi.get(id);
-            lokasi = 2;
-            energiTerakhir = demo.getE();
-            mapKonsumsi.remove(id); // Hapus dari mapKonsumsi
-            demo.setRemoved(true); // Tandai sebagai removed
-            out.println(lokasi + " " + energiTerakhir);
+            Demonstran demo = mapKonsumsi.get(id);
+            int energiTerakhir = demo.getEnergiAktual(globalOffset);
 
-        // Jika tidak ada di kedua map
+            if (energiTerakhir <= 0) {
+                out.println("-1");
+            } else {
+                out.println(2 + " " + energiTerakhir);
+            }
+            demo.setRemoved(true); // Tandai sebagai dihapus
+            mapKonsumsi.remove(id); // Hapus dari mapKonsumsi
+            
         } else {
             out.println("-1");
-            return;
         }
     }
 
     public static void K(int bawah, int atas, PrintWriter out) {
-        if(antreanKonsumsi.isEmpty()){
+        // Bersihkan antrean konsumsi dari yang sudah dihapus atau energinya habis
+        while (!antreanKonsumsi.isEmpty()) {
+            Demonstran peek = antreanKonsumsi.peekFirst();
+            if (peek.isRemoved() || peek.getEnergiAktual(globalOffset) <= 0) {
+                mapKonsumsi.remove(antreanKonsumsi.pollFirst().getID());
+            } else {
+                break;
+            }
+        }
+
+        // Jika antrean kosong
+        if (antreanKonsumsi.isEmpty()) {
             out.println("-1");
             return;
         }
-    }
 
-    public static void O(int X, PrintWriter out) {
-        if(X == 0){
+        Demonstran demo = antreanKonsumsi.pollFirst(); // Ambil demonstran paling depan
+        mapKonsumsi.remove(demo.getID()); // 
+        int energiAktual = demo.getEnergiAktual(globalOffset);
+        int konsumsiDiambil = findLargestConsumption(bawah, atas);
+
+        if (konsumsiDiambil != 0) {
+            out.println(konsumsiDiambil);
+            demo.setE(energiAktual + konsumsiDiambil);
+        } else {
             out.println("0");
-            return;
-        }       
-
+            demo.setE(energiAktual);
+        }
+        
+        demo.setFlagB(globalOffset);
+        mapDemonstran.put(demo.getID(), demo);
+        antreanDemo.add(demo);
+    }
+    
+    // Method untuk mencari konsumsi terbesar
+    private static int findLargestConsumption(int bawah, int atas) {
+        if (energiKonsumsi.length == 0) return 0;
+        int idx = Arrays.binarySearch(energiKonsumsi, atas);
+        if (idx < 0) {
+            idx = -(idx + 1) - 1;
+        }
+        if (idx >= 0 && energiKonsumsi[idx] >= bawah) {
+            return energiKonsumsi[idx];
+        }
+        return 0;
     }
 
-    public static void P(int X, PrintWriter out) {
-    } 
+    public static void O(int X, PrintWriter out) { }
+    public static void P(int X, PrintWriter out) { }
 
     // taken from https://codeforces.com/submissions/Petr
     // together with PrintWriter, these input-output (IO) is much faster than the
